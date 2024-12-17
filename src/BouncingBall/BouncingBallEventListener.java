@@ -183,9 +183,12 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
         }
     }
     public String getTime() {
-        long elapsedTime = (System.currentTimeMillis() - startTime) / 1000; // Elapsed time in seconds
-        long minutes = elapsedTime / 60;
-        long seconds = elapsedTime % 60;
+        long minutes=0,seconds=0;
+        if(!gameover) {
+            long elapsedTime = (System.currentTimeMillis() - startTime) / 1000; // Elapsed time in seconds
+            minutes = elapsedTime / 60;
+            seconds = elapsedTime % 60;
+        }
         return String.format("%02d:%02d", minutes, seconds);
     }
     @Override
