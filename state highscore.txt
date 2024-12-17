@@ -1,0 +1,158 @@
+import com.jogamp.opengl.*;
+import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.util.awt.TextRenderer;
+
+import java.awt.*;
+import java.awt.event.*;
+import java.util.List;
+
+public class GameRenderer implements GLEventListener, MouseListener {
+    // States
+    private enum State {
+        MENU, GAME, HIGH_SCORES
+    }
+
+    private State currentState = State.MENU;
+
+    // Managers
+    private TextRenderer textRenderer;
+    private HighScoreManager highScoreManager;
+
+    // Screen Dimensions
+    private int screenWidth = 800;
+    private int screenHeight = 600;
+
+    // Menu Options
+    private String[] menuOptions = {"Start Game", "High Scores", "Exit"};
+    private int selectedMenuOption = -1;
+
+    public GameRenderer() {
+        textRenderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 36));
+        highScoreManager = new HighScoreManager(); // For High Scores
+    }
+
+    @Override
+    public void init(GLAutoDrawable drawable) {
+        drawable.getGL().setSwapInterval(1);
+        drawable.addMouseListener(this);
+    }
+
+    @Override
+    public void display(GLAutoDrawable drawable) {
+        GL2 gl = drawable.getGL().getGL2();
+        gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+        gl.glLoadIdentity();
+
+        switch (currentState) {
+            case MENU:
+                renderMenu();
+                break;
+            case GAME:
+                renderGame();
+                break;
+            case HIGH_SCORES:
+                renderHighScores();
+                break;
+        }
+    }
+
+    private void renderMenu() {
+        textRenderer.beginRendering(screenWidth, screenHeight);
+        textRenderer.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+        // Title
+        textRenderer.draw("Main Menu", screenWidth / 2 - 100, screenHeight - 100);
+
+        // Render Menu Options
+        for (int i = 0; i < menuOptions.length; i++) {
+            if (selectedMenuOption == i) {
+                textRenderer.setColor(1.0f, 0.0f, 0.0f, 1.0f); // Highlighted in red
+            } else {
+                textRenderer.setColor(1.0f, 1.0f, 1.0f, 1.0f); // Default white
+            }
+            textRenderer.draw(menuOptions[i], screenWidth / 2 - 100, screenHeight - (150 + i * 60));
+        }
+        textRenderer.endRendering();
+    }
+
+    private void renderGame() {
+        textRenderer.beginRendering(screenWidth, screenHeight);
+        textRenderer.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+        textRenderer.draw("Game Screen: Press ESC to return to Menu", 50, screenHeight / 2);
+        textRenderer.endRendering();
+    }
+
+    private void renderHighScores() {
+        textRenderer.beginRendering(screenWidth, screenHeight);
+        textRenderer.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+        // Title
+        textRenderer.draw("High Scores", screenWidth / 2 - 100, screenHeight - 100);
+
+        // Display High Scores
+        List<Integer> scores = highScoreManager.getScores();
+        int y = screenHeight - 150;
+        for (int i = 0; i < scores.size(); i++) {
+            textRenderer.draw((i + 1) + ". " + scores.get(i), screenWidth / 2 - 50, y);
+            y -= 40;
+        }
+
+        textRenderer.draw("Press ESC to return to Menu", 50, 50);
+        textRenderer.endRendering();
+    }
+
+    @Override
+    public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
+        this.screenWidth = width;
+        this.screenHeight = height;
+
+        GL2 gl = drawable.getGL().getGL2();
+        gl.glViewport(0, 0, width, height);
+        gl.glMatrixMode(GL2.GL_PROJECTION);
+        gl.glLoadIdentity();
+        gl.glOrtho(0, width, 0, height, -1, 1);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
+    }
+
+    @Override
+    public void dispose(GLAutoDrawable drawable) {
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        int mouseY = screenHeight - e.getY(); // Convert to OpenGL coordinates
+
+        if (currentState == State.MENU) {
+            for (int i = 0; i < menuOptions.length; i++) {
+                int optionY = screenHeight - (150 + i * 60);
+                if (mouseY > optionY - 30 && mouseY < optionY + 30) {
+                    selectedMenuOption = i;
+                    handleMenuSelection(i);
+                }
+            }
+        }
+    }
+
+    private void handleMenuSelection(int option) {
+        switch (option) {
+            case 0: // Start Game
+                currentState = State.GAME;
+                break;
+            case 1: // High Scores
+                currentState = State.HIGH_SCORES;
+                break;
+            case 2: // Exit
+                System.exit(0);
+                break;
+        }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {}
+    @Override
+    public void mouseReleased(MouseEvent e) {}
+    @Override
+    public void mouseEntered(MouseEvent e) {}
+    @Override
+    public void mouseExited(MouseEvent e) {}
+}

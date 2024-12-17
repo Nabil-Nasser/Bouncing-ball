@@ -1,0 +1,26 @@
+import com.jogamp.opengl.*;
+import com.jogamp.opengl.awt.GLCanvas;
+
+import java.awt.Frame;
+
+public class Main {
+    public static void main(String[] args) {
+        GLProfile profile = GLProfile.get(GLProfile.GL2);
+        GLCapabilities capabilities = new GLCapabilities(profile);
+
+        GLCanvas canvas = new GLCanvas(capabilities);
+        GameRenderer renderer = new GameRenderer();
+        canvas.addGLEventListener(renderer);
+
+        Frame frame = new Frame("JOGL Linked Game");
+        frame.add(canvas);
+        frame.setSize(800, 600);
+        frame.setVisible(true);
+
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                System.exit(0);
+            }
+        });
+    }
+}
