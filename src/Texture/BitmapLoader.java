@@ -1,4 +1,4 @@
-package Texture;
+package CS304.Texture;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -8,9 +8,8 @@ import java.io.InputStream;
 
 /**
  * Windows bitmap file loader.
- * @author Abdul Bezrati
- * @author Pepijn Van Eeckhoudt
  */
+
 public class BitmapLoader {
     public static BufferedImage loadBitmap(String file) throws IOException {
         BufferedImage image;
@@ -149,3 +148,4 @@ public class BitmapLoader {
         }
     }
 }
+
