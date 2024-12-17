@@ -10,6 +10,7 @@ import javax.media.opengl.glu.GLU;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
+import java.util.BitSet;
 
 public class BouncingBallEventListener implements GLEventListener,KeyListener {
     float screenHeight = 200;
@@ -27,6 +28,14 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
     int[] textures = new int[textureNames.length];
     int[] texturesBricks = new int[textureBricksNames.length];
     /////////////////////////////////////////////////////////////////////textures
+    int brickIndex;
+
+
+    /////////////////////////////////////////////////////////////////////Bricks
+    int xPaddle;
+    int yPaddle= (int)yMin+10;
+
+    /////////////////////////////////////////////////////////////////////Paddle
 
     @Override
     public void init(GLAutoDrawable glAutoDrawable) {
@@ -45,7 +54,9 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         gl.glLoadIdentity();
         DrawBackground(gl);
-        DrawSprite(gl,0,yMin+10,textures,0,0,4.5f,1);
+        DrawSprite(gl,0,yMax-15,texturesBricks,brickIndex,0,2,1);
+        brickIndex = (int) (Math.random() * texturesBricks.length);
+        DrawSprite(gl,xPaddle,yPaddle,textures,0,0,4.5f,1); // paddle
         DrawSprite(gl,0,yMin+20,textures,1,0,1,1);
     }
 
@@ -58,6 +69,10 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
     public void displayChanged(GLAutoDrawable glAutoDrawable, boolean b, boolean b1) {
 
     }
+    public BitSet keyBits = new BitSet(256);
+    public boolean isKeyPressed(int keyCode) {
+        return keyBits.get(keyCode);
+    }
 
     @Override
     public void keyTyped(KeyEvent e) {
@@ -66,12 +81,19 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-
+        int keyCode = e.getKeyCode();
+        keyBits.set(keyCode);
+        if (keyCode == KeyEvent.VK_LEFT) {
+            xPaddle--;
+        } else if (keyCode == KeyEvent.VK_RIGHT) {
+            xPaddle++;
+        }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-
+        int keyCode = e.getKeyCode();
+        keyBits.clear(keyCode);
     }
     public void fillBricks(){
         for (int i = 0; i <= 5; i++) {
