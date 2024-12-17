@@ -9,15 +9,21 @@ import java.awt.*;
 public class BouncingBall extends JFrame {
     private GLCanvas glCanvas;
     static FPSAnimator animator = null;
-    private BouncingBallEventListener listener = new BouncingBallEventListener();
+    private BouncingBallEventListener listener;
 
     public static void main(String[] args) {
-        new BouncingBall();
+        String playerName = JOptionPane.showInputDialog("Enter your name to start the game:");
+        if (playerName == null || playerName.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Name is required to start the game!");
+            System.exit(0);
+        }
+        new BouncingBall(playerName);
         animator.start();
     }
 
-    public BouncingBall() {
+    public BouncingBall(String playerName) {
         super("BounceIT");
+        listener = new BouncingBallEventListener(playerName);
         glCanvas = new GLCanvas();
         glCanvas.addGLEventListener(listener);
         glCanvas.addKeyListener(listener);

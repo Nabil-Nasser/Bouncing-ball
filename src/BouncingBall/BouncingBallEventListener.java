@@ -19,6 +19,15 @@ import java.util.List;
 import java.util.Random;
 
 public class BouncingBallEventListener implements GLEventListener,KeyListener {
+    private String playerName; // Player's name
+    private HighScoreSaver highScoresaver = new HighScoreSaver();
+    int score = 0; // Player's score
+    int lives = 3; // Player's lives
+    public BouncingBallEventListener(String playerName) {
+        this.playerName = playerName;
+    }
+
+    ////////////////////////////////////////////////
     private GLUT glut = new GLUT();
     float screenHeight = 200;
     float screenWidth = 200;
@@ -46,8 +55,6 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
     float xBall = 0, yBall = yMin + 20; // Start near the paddle
     float xVelocity = 1.5f, yVelocity = 2.0f; // Ball's movement speed
     Random random = new Random();
-    int lives = 3;
-    int score;
     boolean gameover = false;
     /////////////////////////////////////////////////////////////////////Ball
     long startTime = System.currentTimeMillis();
@@ -93,6 +100,8 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
                 resetBall();
                 if (lives <= 0) {
                     gameover = true;
+                    highScoresaver.addScore(playerName,score);
+                    displayHighScores();
                 }
             }// Ball missed the paddle and hit the floor
 
@@ -105,9 +114,18 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
 
         renderText(gl, "Score: " + score, 0.6f, -0.9f);
         renderText(gl, "Time: " + getTime(), 0.6f, -0.7f);
-        if (gameover) renderText(gl, "Game Over! Press 'R' to Restart", -0.5f, 0.0f);
+//        if (gameover) renderText(gl, "Game Over! Press 'R' to Restart", -0.5f, 0.0f);
 
     }
+
+    public void displayHighScores() {
+        StringBuilder scoresText = new StringBuilder("High Scores:\n");
+        for (HighScore hs : highScoresaver.getScores()) {
+            scoresText.append(hs.userName).append(": ").append(hs.score).append("\n");
+        }
+        JOptionPane.showMessageDialog(null, scoresText.toString(), "Leaderboard", JOptionPane.INFORMATION_MESSAGE);
+    }
+
 
     public void resetBall() {
         xBall = xPaddle;
