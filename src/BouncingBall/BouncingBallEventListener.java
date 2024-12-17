@@ -2,6 +2,7 @@ package BouncingBall;
 
 
 import Texture.TextureReader;
+import com.sun.opengl.util.GLUT;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Random;
 
 public class BouncingBallEventListener implements GLEventListener,KeyListener {
+    private GLUT glut = new GLUT();
     float screenHeight = 200;
     float screenWidth = 200;
     float xMax = screenWidth / 2f;
@@ -45,7 +47,11 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
     float xVelocity = 1.5f, yVelocity = 2.0f; // Ball's movement speed
     Random random = new Random();
     int lives = 3;
+    int score;
+    boolean gameover = false;
     /////////////////////////////////////////////////////////////////////Ball
+    long startTime = System.currentTimeMillis();
+
 
     @Override
     public void init(GLAutoDrawable glAutoDrawable) {
@@ -72,7 +78,7 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
             DrawSprite(gl, xPaddle, yPaddle, textures, 0, 0, 4.5f, 1);
             handleKeyPress();
         }//^paddle
-        {
+        if(!gameover){
             xBall += xVelocity;
             yBall += yVelocity;
             if (xBall >= xMax - 5 || xBall <= xMin + 5) {
@@ -84,16 +90,11 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
             if (yBall <= yMin + 5) {
                 System.out.println("Ball missed the paddle!");
                 lives--;
-                xBall = xPaddle;
-                yBall = yMin + 20;
-                xVelocity = 1.5f;
-                yVelocity = 2.0f;
+                resetBall();
                 if (lives <= 0) {
-                    System.out.println("GameOver");
-                    JOptionPane.showMessageDialog((Component)null, "GameOver.", "GameOver", JOptionPane.WARNING_MESSAGE);
-                    System.exit(0);
+                    gameover = true;
                 }
-            }// Ball missed the paddle
+            }// Ball missed the paddle and hit the floor
 
             DrawSprite(gl, xBall, yBall, textures, 1, 0, 1, 1); // ball
 
@@ -101,8 +102,19 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
             checkBrickColl();// here we achieve bricks collision with our ball
         }//^ball
         drawHearts(gl); //hearts
+
+        renderText(gl, "Score: " + score, 0.6f, -0.9f);
+        renderText(gl, "Time: " + getTime(), 0.6f, -0.7f);
+        if (gameover) renderText(gl, "Game Over! Press 'R' to Restart", -0.5f, 0.0f);
+
     }
 
+    public void resetBall() {
+        xBall = xPaddle;
+        yBall = yMin + 20;
+        xVelocity = 1.5f;
+        yVelocity = 2.0f;
+    }
     public void drawBricks() {
         float startX = xMin + 15; // Starting X position
         float startY = yMax - 10; // Starting Y position
@@ -122,7 +134,6 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
             }
         }
     }
-
     public void drawHearts(GL gl) {
         float heartX = xMin + 10; // Starting X position for the first heart
         float heartY = yMin + 10; // Y position near the top-left corner
@@ -146,11 +157,18 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
                     brick.isVisible = false;
                     yVelocity = -yVelocity + Randomness();
                     xVelocity += Randomness();
+                    score += 1;
                     System.out.println("Hit a brick!");
                     break;
                 }
             }
         }
+    }
+    public String getTime() {
+        long elapsedTime = (System.currentTimeMillis() - startTime) / 1000; // Elapsed time in seconds
+        long minutes = elapsedTime / 60;
+        long seconds = elapsedTime % 60;
+        return String.format("%02d:%02d", minutes, seconds);
     }
     @Override
     public void reshape(GLAutoDrawable glAutoDrawable, int i, int i1, int i2, int i3) {
@@ -172,11 +190,26 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
     public void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode();
         keyBits.set(keyCode);
+        if (keyCode == KeyEvent.VK_R && gameover) {
+            score = 0;
+            lives = 3;
+            gameover = false;
+            resetBall();
+            startTime = System.currentTimeMillis();
+            for (Brick brick : bricks) {
+                brick.isVisible = true;
+            }
+        }
     }
     @Override
     public void keyReleased(KeyEvent e) {
         int keyCode = e.getKeyCode();
         keyBits.clear(keyCode);
+    }
+    public void renderText(GL gl, String text, float x, float y) {
+//        gl.glRasterPos2f(x/xMax + 0.7f,y/yMax +0.85f); // Set position for the text
+        gl.glRasterPos2f(x, y); // Position for text
+        glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, text);
     }
     public void handleKeyPress() {
         if (isKeyPressed(KeyEvent.VK_LEFT)) {
