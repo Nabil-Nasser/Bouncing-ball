@@ -36,6 +36,11 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
     int yPaddle= (int)yMin+10;
 
     /////////////////////////////////////////////////////////////////////Paddle
+    float xBall = 0, yBall = yMin + 20; // Start near the paddle
+    float xVelocity = 1.5f, yVelocity = 2.0f; // Ball's movement speed
+
+
+    /////////////////////////////////////////////////////////////////////Ball
 
     @Override
     public void init(GLAutoDrawable glAutoDrawable) {
@@ -54,11 +59,48 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         gl.glLoadIdentity();
         DrawBackground(gl);
-        DrawSprite(gl,0,yMax-15,texturesBricks,brickIndex,0,2,1);
-        brickIndex = (int) (Math.random() * texturesBricks.length);
-        DrawSprite(gl,xPaddle,yPaddle,textures,0,0,4.5f,1); // paddle
-        handleKeyPress();
-        DrawSprite(gl,0,yMin+20,textures,1,0,1,1);
+
+        drawBricks(gl); // drawing bricks
+        {
+            DrawSprite(gl, xPaddle, yPaddle, textures, 0, 0, 4.5f, 1);
+            handleKeyPress();
+        }//^paddle
+        {
+            xBall += xVelocity;
+            yBall += yVelocity;
+            if (xBall >= xMax - 5 || xBall <= xMin + 5) {
+                xVelocity = -xVelocity; // Reverse x direction
+            }
+            if (yBall >= yMax - 5) {
+                yVelocity = -yVelocity; // Reverse y direction
+            }
+            if (yBall <= yMin + 5) {
+                // Ball missed the paddle (you can add game over logic here)
+                System.out.println("Ball missed the paddle!");
+                xBall = 0;
+                yBall = yMin + 20;
+                xVelocity = 1.5f;
+                yVelocity = 2.0f;
+            }
+            DrawSprite(gl, xBall, yBall, textures, 1, 0, 1, 1); // ball
+
+            if (yBall <= yPaddle + 7 && yBall >= yPaddle - 7 &&
+                    xBall >= xPaddle - 25 && xBall <= xPaddle + 25) {
+                yVelocity = -yVelocity;
+            }// collision
+        }//^ball
+    }
+
+    public void drawBricks(GL gl) {
+        float startX = xMin + 15; // Starting X position
+        float startY = yMax - 10; // Starting Y position
+        for (int row = 0; row < texturesBricks.length; row++) {
+            for (int col = 0; col < 8; col++) {
+                float x = startX + col * (4 + 20);
+                float y = startY - row * (2 + 10);
+                DrawSprite(gl,x,y,texturesBricks, row % texturesBricks.length,0,2,1);
+            }
+        }
     }
 
     @Override
@@ -84,15 +126,6 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
     public void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode();
         keyBits.set(keyCode);
-        if (keyCode == KeyEvent.VK_LEFT) {
-            if (xPaddle > xMin + 23) {
-                xPaddle--;
-            }
-        } else if (keyCode == KeyEvent.VK_RIGHT) {
-            if (xPaddle < xMax - 23) {
-                xPaddle++;
-            }
-        }
     }
 
     @Override

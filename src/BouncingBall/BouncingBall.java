@@ -22,7 +22,7 @@ public class BouncingBall extends JFrame {
         glCanvas.addGLEventListener(listener);
         glCanvas.addKeyListener(listener);
         getContentPane().add(glCanvas, BorderLayout.CENTER);
-        animator = new FPSAnimator(glCanvas, 60);
+        animator = new FPSAnimator(glCanvas, 144);
         setSize(600, 600);
         setLocationRelativeTo(this);
         setVisible(true);
