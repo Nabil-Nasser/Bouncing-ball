@@ -1,0 +1,118 @@
+import com.jogamp.opengl.*;
+import com.jogamp.opengl.awt.GLCanvas;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class SimpleGameGUI {
+    private JFrame frame;
+    private JPanel buttonPanel;
+    private GLCanvas gameCanvas;
+
+    public SimpleGameGUI() {
+        initializeGUI();
+    }
+
+    private void initializeGUI() {
+        // Create the Main JFrame
+        frame = new JFrame("My Simple JOGL Game :)");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 600);
+        frame.setLayout(new BorderLayout());
+
+        // Create the JOGL canvas for the game
+        gameCanvas = createGameCanvas();
+        frame.add(gameCanvas, BorderLayout.CENTER);
+
+        // Create a simple button panel (Menu)
+        buttonPanel = new JPanel();
+        buttonPanel.setLayout(new FlowLayout());
+        buttonPanel.setBackground(Color.CYAN);
+
+        // Add Buttons to Panel
+        JButton startButton = new JButton("Start Game");
+        startButton.setBackground(Color.YELLOW);
+        startButton.setFont(new Font("Comic Sans MS", Font.BOLD, 16));
+
+        JButton exitButton = new JButton("Exit");
+        exitButton.setBackground(Color.PINK);
+        exitButton.setFont(new Font("Comic Sans MS", Font.BOLD, 16));
+
+        buttonPanel.add(startButton);
+        buttonPanel.add(exitButton);
+
+        // Add Panel to Bottom
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Button Actions
+        startButton.addActionListener(e -> JOptionPane.showMessageDialog(frame, "Game Started! Have fun! :)"));
+        exitButton.addActionListener(e -> System.exit(0));
+
+        // Make the Frame Visible
+        frame.setVisible(true);
+    }
+
+    private GLCanvas createGameCanvas() {
+        // Create a simple JOGL canvas
+        GLProfile profile = GLProfile.get(GLProfile.GL2);
+        GLCapabilities capabilities = new GLCapabilities(profile);
+        GLCanvas canvas = new GLCanvas(capabilities);
+
+        // Add a renderer to draw something simple
+        canvas.addGLEventListener(new SimpleRenderer());
+
+        return canvas;
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(SimpleGameGUI::new);
+    }
+}
+
+class SimpleRenderer implements GLEventListener {
+    @Override
+    public void init(GLAutoDrawable drawable) {
+        // Set a bright background color
+        GL2 gl = drawable.getGL().getGL2();
+        gl.glClearColor(0.5f, 0.7f, 1.0f, 1.0f); // Light blue
+    }
+
+    @Override
+    public void display(GLAutoDrawable drawable) {
+        GL2 gl = drawable.getGL().getGL2();
+        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+        gl.glLoadIdentity();
+
+        // Draw a colorful square (simple design)
+        gl.glColor3f(1.0f, 0.0f, 0.0f); // Red
+        gl.glBegin(GL2.GL_QUADS);
+        gl.glVertex2f(-0.5f, -0.5f);
+        gl.glVertex2f(0.5f, -0.5f);
+        gl.glVertex2f(0.5f, 0.5f);
+        gl.glVertex2f(-0.5f, 0.5f);
+        gl.glEnd();
+
+        // Draw a message (as if drawn by a kid)
+        TextRenderer textRenderer = new TextRenderer(new Font("Comic Sans MS", Font.BOLD, 24));
+        textRenderer.beginRendering(drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
+        textRenderer.setColor(1.0f, 0.0f, 1.0f, 1.0f); // Bright pink
+        textRenderer.draw("Look! A red square!", 150, drawable.getSurfaceHeight() / 2);
+        textRenderer.endRendering();
+    }
+
+    @Override
+    public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
+        GL2 gl = drawable.getGL().getGL2();
+        gl.glViewport(0, 0, width, height);
+        gl.glMatrixMode(GL2.GL_PROJECTION);
+        gl.glLoadIdentity();
+        gl.glOrtho(-1, 1, -1, 1, -1, 1);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
+    }
+
+    @Override
+    public void dispose(GLAutoDrawable drawable) {
+    }
+}
