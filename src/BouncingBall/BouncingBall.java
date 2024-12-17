@@ -12,7 +12,7 @@ public class BouncingBall extends JFrame {
     private BouncingBallEventListener listener;
 
     public static void main(String[] args) {
-        String playerName = JOptionPane.showInputDialog("Enter your name to start the game:");
+        String playerName = JOptionPane.showInputDialog("Instructions is left and right \nEnter your name to start the game:");
         if (playerName == null || playerName.trim().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Name is required to start the game!");
             System.exit(0);
@@ -27,6 +27,7 @@ public class BouncingBall extends JFrame {
         glCanvas = new GLCanvas();
         glCanvas.addGLEventListener(listener);
         glCanvas.addKeyListener(listener);
+        glCanvas.addMouseListener(listener);
         getContentPane().add(glCanvas, BorderLayout.CENTER);
         animator = new FPSAnimator(glCanvas, 144);
         setSize(600, 600);

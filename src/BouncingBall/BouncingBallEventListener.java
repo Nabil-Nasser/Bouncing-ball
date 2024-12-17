@@ -12,13 +12,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
 
-public class BouncingBallEventListener implements GLEventListener,KeyListener {
+public class BouncingBallEventListener implements GLEventListener,KeyListener, MouseListener {
     private String playerName; // Player's name
     private HighScoreSaver highScoresaver = new HighScoreSaver();
     int score = 0; // Player's score
@@ -35,9 +37,10 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
     float xMin = -(screenWidth / 2f);
     float yMax = screenHeight / 2f;
     float yMin = -(screenHeight / 2f);
+    boolean is_paused = false;
     /////////////////////////////////////////////////      for screen
     String assetsFolderName = "src//Assets//ball";
-    String[] textureNames = {"Paddle1.png","purpleBall.png","heart.png","back.png"};
+    String[] textureNames = {"Paddle1.png","purpleBall.png","heart.png","pause.png","back.png"};
     String[] textureBricksNames = new String[6];
     TextureReader.Texture[] texture = new TextureReader.Texture[textureNames.length];
     TextureReader.Texture[] textureBrick = new TextureReader.Texture[textureBricksNames.length];
@@ -78,44 +81,50 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         gl.glLoadIdentity();
         DrawBackground(gl);
-
         showBricks(gl);
+        DrawSprite(gl, xPaddle, yPaddle, textures, 0, 0, 4.5f, 1);
+        DrawSprite(gl, 90, 90, textures, 3, 0, 1.5f, 1.5f);
 
         {
-            DrawSprite(gl, xPaddle, yPaddle, textures, 0, 0, 4.5f, 1);
             handleKeyPress();
         }//^paddle
-        if(!gameover){
-            xBall += xVelocity;
-            yBall += yVelocity;
-            if (xBall >= xMax - 5 || xBall <= xMin + 5) {
-                xVelocity = -xVelocity + Randomness();
-            }
-            if (yBall >= yMax - 5) {
-                yVelocity = -yVelocity + Randomness();
-            }
-            if (yBall <= yMin + 5) {
-                System.out.println("Ball missed the paddle!");
-                lives--;
-                resetBall();
-                if (lives <= 0) {
-                    gameover = true;
-                    highScoresaver.addScore(playerName,score);
-                    displayHighScores();
-                }
-            }// Ball missed the paddle and hit the floor
+        if (!is_paused) {
 
+            if (!gameover) {
+                xBall += xVelocity;
+                yBall += yVelocity;
+                if (xBall >= xMax - 5 || xBall <= xMin + 5) {
+                    xVelocity = -xVelocity + Randomness();
+                }
+                if (yBall >= yMax - 5) {
+                    yVelocity = -yVelocity + Randomness();
+                }
+                if (yBall <= yMin + 5) {
+                    System.out.println("Ball missed the paddle!");
+                    lives--;
+                    resetBall();
+                    if (lives <= 0) {
+                        gameover = true;
+                        highScoresaver.addScore(playerName, score);
+                        displayHighScores();
+                    }
+                }// Ball missed the paddle and hit the floor
+
+                DrawSprite(gl, xBall, yBall, textures, 1, 0, 1, 1); // ball
+                renderText(gl, "Time: " + getTime(), 0.6f, -0.8f);
+
+            }
             DrawSprite(gl, xBall, yBall, textures, 1, 0, 1, 1); // ball
+
 
             checkPaddleColl();// here guys we achieve paddle collision with our ball
             checkBrickColl();// here we achieve bricks collision with our ball
         }//^ball
-        drawHearts(gl); //hearts
+            drawHearts(gl); //hearts
 
-        renderText(gl, "Score: " + score, 0.6f, -0.9f);
-        renderText(gl, "Time: " + getTime(), 0.6f, -0.8f);
-        if (gameover) renderText(gl, "Game Over! Press 'R' to Restart", -0.5f, 0.0f);
-
+            renderText(gl, "Score: " + score, 0.6f, -0.9f);
+            renderText(gl, "Time: " + getTime(), 0.6f, -0.8f);
+            if (gameover) renderText(gl, "Game Over! Press 'R' to Restart", -0.5f, 0.0f);
     }
 
     public void displayHighScores() {
@@ -135,7 +144,7 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
     }
     public void drawBricks() {
         float startX = xMin + 15; // Starting X position
-        float startY = yMax - 10; // Starting Y position
+        float startY = yMax - 25; // Starting Y position
         for (int row = 0; row < texturesBricks.length; row++) {
             for (int col = 0; col < 8; col++) {
                 float x = startX + col * (4 + 20);
@@ -307,4 +316,37 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
         gl.glEnd();
     }
 
+    @Override
+    public void mouseClicked(MouseEvent mouseEvent) {
+        int mouseX = mouseEvent.getX();
+        int mouseY = mouseEvent.getY();
+
+        System.out.println("( " + mouseX + " , " + mouseY+ " )");
+
+        if ((mouseX >= 534 && mouseX <= 574) && (mouseY >= (7) && mouseY <= (47)))
+        {
+            is_paused = !is_paused;
+        }
+    }
+
+
+    @Override
+    public void mousePressed(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent mouseEvent) {
+
+    }
 }
