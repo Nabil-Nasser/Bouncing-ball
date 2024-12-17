@@ -1,4 +1,4 @@
-package CS304.Texture;
+package Texture;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;

@@ -1,6 +1,6 @@
 package MonsterRush;
 
-import CS304.Texture.TextureReader;
+import Texture.TextureReader;
 import com.sun.opengl.util.GLUT;
 
 import javax.media.opengl.GL;

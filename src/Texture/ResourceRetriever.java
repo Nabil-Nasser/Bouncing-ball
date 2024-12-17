@@ -1,4 +1,4 @@
-package CS304.Texture;
+package Texture;
 
 import java.io.FileInputStream;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package CS304.Texture;
+package Texture;
 
 import com.sun.opengl.util.BufferUtil;
 
