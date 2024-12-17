@@ -10,7 +10,9 @@ import javax.media.opengl.glu.GLU;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.List;
 
 public class BouncingBallEventListener implements GLEventListener,KeyListener {
     float screenHeight = 200;
@@ -28,8 +30,8 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
     int[] textures = new int[textureNames.length];
     int[] texturesBricks = new int[textureBricksNames.length];
     /////////////////////////////////////////////////////////////////////textures
-    int brickIndex;
-
+    int brickIndexColor;
+    List<Brick> bricks = new ArrayList<>();
 
     /////////////////////////////////////////////////////////////////////Bricks
     int xPaddle;
@@ -51,6 +53,7 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
         gl.glBlendFunc(GL.GL_SRC_ALPHA,GL.GL_ONE_MINUS_SRC_ALPHA);
         generateTextures(textureNames,texture,textures,gl);
         generateTextures(textureBricksNames,textureBrick, texturesBricks,gl);
+        drawBricks(); // drawing bricks
     }
 
     @Override
@@ -60,7 +63,8 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
         gl.glLoadIdentity();
         DrawBackground(gl);
 
-        drawBricks(gl); // drawing bricks
+        showBricks(gl);
+
         {
             DrawSprite(gl, xPaddle, yPaddle, textures, 0, 0, 4.5f, 1);
             handleKeyPress();
@@ -69,36 +73,59 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
             xBall += xVelocity;
             yBall += yVelocity;
             if (xBall >= xMax - 5 || xBall <= xMin + 5) {
-                xVelocity = -xVelocity; // Reverse x direction
+                xVelocity = -xVelocity;
             }
             if (yBall >= yMax - 5) {
-                yVelocity = -yVelocity; // Reverse y direction
+                yVelocity = -yVelocity;
             }
             if (yBall <= yMin + 5) {
-                // Ball missed the paddle (you can add game over logic here)
                 System.out.println("Ball missed the paddle!");
                 xBall = 0;
                 yBall = yMin + 20;
                 xVelocity = 1.5f;
                 yVelocity = 2.0f;
-            }
+            }// Ball missed the paddle
+
             DrawSprite(gl, xBall, yBall, textures, 1, 0, 1, 1); // ball
 
-            if (yBall <= yPaddle + 7 && yBall >= yPaddle - 7 &&
-                    xBall >= xPaddle - 25 && xBall <= xPaddle + 25) {
-                yVelocity = -yVelocity;
-            }// collision
+            checkPaddleColl();// here guys we achieve paddle collision with our ball
+            checkBrickColl();// here we achieve bricks collision with our ball
         }//^ball
     }
 
-    public void drawBricks(GL gl) {
+    public void drawBricks() {
         float startX = xMin + 15; // Starting X position
         float startY = yMax - 10; // Starting Y position
         for (int row = 0; row < texturesBricks.length; row++) {
             for (int col = 0; col < 8; col++) {
                 float x = startX + col * (4 + 20);
                 float y = startY - row * (2 + 10);
-                DrawSprite(gl,x,y,texturesBricks, row % texturesBricks.length,0,2,1);
+                brickIndexColor = (int)(Math.random()*texturesBricks.length);
+                bricks.add(new Brick(x, y,brickIndexColor));
+            }
+        }
+    }
+    public void showBricks(GL gl) {
+        for (Brick brick : bricks) {
+            if (brick.isVisible) {
+                DrawSprite(gl,brick.x,brick.y,texturesBricks, brick.colorIndex,0,2,1);
+            }
+        }
+    }
+    public void checkPaddleColl() {
+        if (yBall <= yPaddle + 7 && yBall >= yPaddle - 7 && xBall >= xPaddle - 25 && xBall <= xPaddle + 25) {
+            yVelocity = -yVelocity;
+        }
+    }
+    public void checkBrickColl() {
+        for (Brick brick : bricks) {
+            if (brick.isVisible) {
+                if (xBall >= brick.x - 15 && xBall <= brick.x + 15 &&yBall >= brick.y - 8 && yBall <= brick.y + 8) {
+                    brick.isVisible = false;
+                    yVelocity = -yVelocity;  //
+                    System.out.println("Hit a brick!");
+                    break;
+                }
             }
         }
     }
@@ -136,12 +163,12 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
     public void handleKeyPress() {
         if (isKeyPressed(KeyEvent.VK_LEFT)) {
             if (xPaddle > xMin + 23) {
-                xPaddle--;
+                xPaddle-=2;
             }
         }
         if (isKeyPressed(KeyEvent.VK_RIGHT)) {
             if (xPaddle < xMax - 23) {
-                xPaddle++;
+                xPaddle+=2;
             }
         }
     }
