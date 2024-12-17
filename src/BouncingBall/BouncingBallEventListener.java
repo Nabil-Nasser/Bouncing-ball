@@ -57,6 +57,7 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
         DrawSprite(gl,0,yMax-15,texturesBricks,brickIndex,0,2,1);
         brickIndex = (int) (Math.random() * texturesBricks.length);
         DrawSprite(gl,xPaddle,yPaddle,textures,0,0,4.5f,1); // paddle
+        handleKeyPress();
         DrawSprite(gl,0,yMin+20,textures,1,0,1,1);
     }
 
@@ -84,9 +85,13 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
         int keyCode = e.getKeyCode();
         keyBits.set(keyCode);
         if (keyCode == KeyEvent.VK_LEFT) {
-            xPaddle--;
+            if (xPaddle > xMin + 23) {
+                xPaddle--;
+            }
         } else if (keyCode == KeyEvent.VK_RIGHT) {
-            xPaddle++;
+            if (xPaddle < xMax - 23) {
+                xPaddle++;
+            }
         }
     }
 
@@ -94,6 +99,18 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
     public void keyReleased(KeyEvent e) {
         int keyCode = e.getKeyCode();
         keyBits.clear(keyCode);
+    }
+    public void handleKeyPress() {
+        if (isKeyPressed(KeyEvent.VK_LEFT)) {
+            if (xPaddle > xMin + 23) {
+                xPaddle--;
+            }
+        }
+        if (isKeyPressed(KeyEvent.VK_RIGHT)) {
+            if (xPaddle < xMax - 23) {
+                xPaddle++;
+            }
+        }
     }
     public void fillBricks(){
         for (int i = 0; i <= 5; i++) {
