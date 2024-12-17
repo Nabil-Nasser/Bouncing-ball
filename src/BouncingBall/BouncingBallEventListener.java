@@ -113,8 +113,8 @@ public class BouncingBallEventListener implements GLEventListener,KeyListener {
         drawHearts(gl); //hearts
 
         renderText(gl, "Score: " + score, 0.6f, -0.9f);
-        renderText(gl, "Time: " + getTime(), 0.6f, -0.7f);
-//        if (gameover) renderText(gl, "Game Over! Press 'R' to Restart", -0.5f, 0.0f);
+        renderText(gl, "Time: " + getTime(), 0.6f, -0.8f);
+        if (gameover) renderText(gl, "Game Over! Press 'R' to Restart", -0.5f, 0.0f);
 
     }
 
